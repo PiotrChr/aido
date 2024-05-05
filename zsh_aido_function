@@ -1,0 +1,50 @@
+# ZSH function for the aido command using Netcat with a spinner, enhanced output, and conditional command execution
+aido_cmd() {
+    local port=${AIGO_PORT:-8765}
+    local delay=0.1
+    local spinstr='|/-\\'
+    local command_output=""
+    tput civis # Hide cursor
+    setopt localoptions nomonitor # Suppress job control messages locally
+
+    # Send the command and capture output asynchronously
+    echo "$1|$PWD" | nc localhost $port > /tmp/aido_response & # Temporarily store response
+    local nc_pid=$!
+
+    # Spinner while waiting for the background process to finish
+    while kill -0 $nc_pid 2>/dev/null; do 
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+
+    printf "    \b\b\b\b"
+    tput cnorm
+    wait $nc_pid
+
+    command_output=$(< /tmp/aido_response)
+    rm /tmp/aido_response
+
+    local first_line="${command_output%%|*}"  # Extract command before the '|'
+    local rest="${command_output#*|}"         # Extract suggestion after the '|'
+
+    if [[ "$first_line" != "None" ]]; then
+        echo "\033[32m$first_line\033[0m"  # Print command in green
+        echo "$rest"
+
+        echo "Do you want to execute the above command? (y/n)"
+        read answer
+        if [[ $answer =~ ^[Yy]$ ]]; then
+            eval "$first_line"
+            echo "Command executed."
+        else
+            echo "Command not executed."
+        fi
+    else
+        echo "$rest"  # Just print the suggestions if no executable command
+    fi
+}
+
+alias aido='aido_cmd'
