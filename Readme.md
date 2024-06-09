@@ -1,6 +1,6 @@
 # AIDO: AI-Driven Operations
 
-AIDO is an advanced command-line tool that leverages machine learning to provide context-aware command suggestions and operational guidance within software development environments. By analyzing your project structure, command history, and specific user queries, AIDO intelligently suggests the most relevant commands for your current context.
+AIDO is an command-line tool that leverages machine learning to provide context-aware command suggestions and operational guidance within software development environments. By analyzing your project structure, command history, and specific user queries, AIDO intelligently suggests the most relevant commands for your current context.
 
 ## Features
 
